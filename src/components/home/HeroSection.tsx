@@ -1,9 +1,11 @@
 
 import { Search } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { SearchSuggestions } from "@/components/search/SearchSuggestions";
+import { useDebounce } from "@/hooks/useDebounce";
 
 interface HeroSectionProps {
   onSearch: (query: string) => void;
@@ -11,14 +13,19 @@ interface HeroSectionProps {
 
 export const HeroSection = ({ onSearch }: HeroSectionProps) => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [isSuggestionsOpen, setIsSuggestionsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const debouncedSearchTerm = useDebounce(searchQuery, 300);
   
   // Popular searches for demonstration
   const popularSearches = ["iPhone 15", "Samsung TV", "Nike Shoes", "Dettol Soap"];
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       onSearch(searchQuery);
+      setIsSuggestionsOpen(false);
     }
   };
 
@@ -26,6 +33,28 @@ export const HeroSection = ({ onSearch }: HeroSectionProps) => {
     setSearchQuery(query);
     onSearch(query);
   };
+  
+  const handleSuggestionSelect = (value: string) => {
+    setSearchQuery(value);
+    onSearch(value);
+  };
+  
+  // Handle keyboard navigation
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Escape") {
+      setIsSuggestionsOpen(false);
+    }
+  };
+  
+  // Show loading state briefly when search term changes
+  useEffect(() => {
+    if (debouncedSearchTerm !== searchQuery) {
+      setIsLoading(true);
+    } else {
+      const timer = setTimeout(() => setIsLoading(false), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [debouncedSearchTerm, searchQuery]);
 
   return (
     <section className="relative pt-20 pb-32 px-6 overflow-hidden">
@@ -49,13 +78,26 @@ export const HeroSection = ({ onSearch }: HeroSectionProps) => {
           <div className="flex gap-2">
             <div className="relative flex-1">
               <Input
+                ref={inputRef}
                 type="text"
                 placeholder="Search for a product (e.g. iPhone 15, Samsung TV, Dettol Soap…)"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setIsSuggestionsOpen(true)}
+                onKeyDown={handleKeyDown}
                 className="pl-4 pr-12 py-6 text-base md:text-lg w-full bg-white/80 backdrop-blur-sm border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow"
               />
               <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+              
+              {/* Search suggestions */}
+              <SearchSuggestions
+                query={searchQuery}
+                isOpen={isSuggestionsOpen}
+                isLoading={isLoading}
+                onSelect={handleSuggestionSelect}
+                onOpenChange={setIsSuggestionsOpen}
+                className="mt-1"
+              />
             </div>
             <Button 
               type="submit" 

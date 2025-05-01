@@ -13,6 +13,7 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [products, setProducts] = useState<Product[]>([]);
   const [showScrollButton, setShowScrollButton] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -25,15 +26,21 @@ const Index = () => {
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-    const results = searchProducts(query);
-    setProducts(results);
+    setIsSearching(true);
     
-    // Scroll to results section
-    if (results.length > 0) {
-      setTimeout(() => {
-        document.getElementById("results")?.scrollIntoView({ behavior: "smooth" });
-      }, 100);
-    }
+    // Add a small delay to simulate search processing
+    setTimeout(() => {
+      const results = searchProducts(query);
+      setProducts(results);
+      setIsSearching(false);
+      
+      // Scroll to results section
+      if (results.length > 0) {
+        setTimeout(() => {
+          document.getElementById("results")?.scrollIntoView({ behavior: "smooth" });
+        }, 100);
+      }
+    }, 500);
   };
 
   const scrollToTop = () => {
@@ -46,7 +53,11 @@ const Index = () => {
       {/* Add padding-top to account for fixed header */}
       <main className="flex-grow pt-16">
         <HeroSection onSearch={handleSearch} />
-        <SearchResults products={products} searchQuery={searchQuery} />
+        <SearchResults 
+          products={products} 
+          searchQuery={searchQuery}
+          isLoading={isSearching}
+        />
         <HowItWorks />
         
         {/* Scroll to top button */}

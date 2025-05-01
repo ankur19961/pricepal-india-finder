@@ -1,5 +1,5 @@
-
 import { Product } from "@/components/home/SearchResults";
+import { Suggestion } from "@/components/search/SearchSuggestions";
 
 // Product image placeholders
 const productImages = [
@@ -18,6 +18,85 @@ const retailerLogos = {
   "Reliance Digital": "https://www.reliancedigital.in/wp-content/uploads/2019/11/Reliance_Digital_Logo.png",
   "Zepto": "https://cdn.zeptonow.com/web-static-assets-prod/artifacts/8.1.1/images/icons/zepto-logo.svg",
   "Blinkit": "https://blinkit.com/images/faviconChange/blinkit-favicon-120x120.png"
+};
+
+// Generate search suggestions based on partial input
+export const getSuggestions = (query: string, popularOnly: boolean = false): Suggestion[] => {
+  const queryLower = query.toLowerCase().trim();
+  
+  // Return popular searches if requested or if query is empty
+  if (popularOnly || !queryLower) {
+    return [
+      { id: "pop1", text: "iPhone 15", category: "products", popular: true },
+      { id: "pop2", text: "Samsung TV", category: "products", popular: true },
+      { id: "pop3", text: "Nike Shoes", category: "products", popular: true },
+      { id: "pop4", text: "Dettol Soap", category: "products", popular: true },
+      { id: "pop5", text: "Laptop", category: "categories", popular: true },
+    ];
+  }
+  
+  const suggestions: Suggestion[] = [];
+  
+  // Products suggestions
+  const productSuggestions = [
+    "iPhone 15 Pro Max", "iPhone 14", "iPhone 13", "iPhone SE",
+    "Samsung Galaxy S23", "Samsung TV Neo QLED", "Samsung Refrigerator",
+    "Sony Bravia TV", "Sony PlayStation 5", "Sony WH-1000XM4",
+    "OnePlus 11", "OnePlus Nord", "OnePlus Buds Pro",
+    "Nike Air Force 1", "Nike Running Shoes", "Nike Dri-FIT T-shirt",
+    "Dettol Hand Wash", "Dettol Soap", "Dettol Sanitizer",
+    "MacBook Pro", "MacBook Air", "Mac Mini",
+    "Dell XPS 13", "Dell Inspiron", "Dell Alienware",
+    "Bluetooth Speakers", "Wireless Earbuds", "Smart Watch"
+  ];
+  
+  productSuggestions.forEach((product, index) => {
+    if (product.toLowerCase().includes(queryLower)) {
+      suggestions.push({
+        id: `prod-${index}`,
+        text: product,
+        category: "products",
+        thumbnail: productImages[index % productImages.length],
+      });
+    }
+  });
+  
+  // Brand suggestions
+  const brandSuggestions = [
+    "Apple", "Samsung", "Sony", "LG", "OnePlus", "Xiaomi", "Dell", 
+    "HP", "Lenovo", "Nike", "Adidas", "Puma", "Dettol", "Dove", 
+    "Colgate", "Pepsi", "Coca-Cola", "Amazon Basics", "Boat", "JBL"
+  ];
+  
+  brandSuggestions.forEach((brand, index) => {
+    if (brand.toLowerCase().includes(queryLower)) {
+      suggestions.push({
+        id: `brand-${index}`,
+        text: brand,
+        category: "brands"
+      });
+    }
+  });
+  
+  // Category suggestions
+  const categorySuggestions = [
+    "Smartphones", "Laptops", "Televisions", "Refrigerators", 
+    "Air Conditioners", "Washing Machines", "Audio", "Wearables", 
+    "Kitchen Appliances", "Personal Care", "Clothing", "Footwear", 
+    "Sports Equipment", "Grocery", "Furniture", "Home Decor"
+  ];
+  
+  categorySuggestions.forEach((category, index) => {
+    if (category.toLowerCase().includes(queryLower)) {
+      suggestions.push({
+        id: `cat-${index}`,
+        text: category,
+        category: "categories"
+      });
+    }
+  });
+  
+  return suggestions;
 };
 
 // Generate mock search results based on the search query
