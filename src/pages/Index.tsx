@@ -1,15 +1,27 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { HeroSection } from "@/components/home/HeroSection";
 import { HowItWorks } from "@/components/home/HowItWorks";
 import { SearchResults, Product } from "@/components/home/SearchResults";
 import { searchProducts } from "@/services/mockData";
+import { Button } from "@/components/ui/button";
+import { ArrowUp } from "lucide-react";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [products, setProducts] = useState<Product[]>([]);
+  const [showScrollButton, setShowScrollButton] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollButton(window.scrollY > 300);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -24,13 +36,29 @@ const Index = () => {
     }
   };
 
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-grow">
+      {/* Add padding-top to account for fixed header */}
+      <main className="flex-grow pt-16">
         <HeroSection onSearch={handleSearch} />
         <SearchResults products={products} searchQuery={searchQuery} />
         <HowItWorks />
+        
+        {/* Scroll to top button */}
+        {showScrollButton && (
+          <Button 
+            onClick={scrollToTop}
+            className="fixed bottom-6 right-6 rounded-full w-12 h-12 bg-pricepal-primary hover:bg-blue-700 shadow-lg p-0 animate-fade-in z-30"
+            aria-label="Scroll to top"
+          >
+            <ArrowUp className="h-5 w-5" />
+          </Button>
+        )}
       </main>
       <Footer />
     </div>
