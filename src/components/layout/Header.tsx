@@ -1,4 +1,3 @@
-
 import { ShoppingBag, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -6,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { SearchSuggestions } from "@/components/search/SearchSuggestions";
 import { useDebounce } from "@/hooks/useDebounce";
+import { getSuggestions } from "@/services/productApi";
 
 export const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);

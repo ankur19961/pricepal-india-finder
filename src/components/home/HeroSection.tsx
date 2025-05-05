@@ -1,4 +1,3 @@
-
 import { Search } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
@@ -6,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { SearchSuggestions } from "@/components/search/SearchSuggestions";
 import { useDebounce } from "@/hooks/useDebounce";
+import { getSuggestions } from "@/services/productApi";
 
 interface HeroSectionProps {
   onSearch: (query: string) => void;
@@ -18,7 +18,7 @@ export const HeroSection = ({ onSearch }: HeroSectionProps) => {
   const debouncedSearchTerm = useDebounce(searchQuery, 300);
   
   // Popular searches for demonstration
-  const popularSearches = ["iPhone 15", "Samsung TV", "Nike Shoes", "Dettol Soap"];
+  const popularSearches = ["iPhone", "Samsung", "Laptop", "Fragrances"];
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleSearch = (e: React.FormEvent) => {
@@ -80,7 +80,7 @@ export const HeroSection = ({ onSearch }: HeroSectionProps) => {
               <Input
                 ref={inputRef}
                 type="text"
-                placeholder="Search for a product (e.g. iPhone 15, Samsung TV, Dettol Soap…)"
+                placeholder="Search for a product (e.g. iPhone, Samsung TV, Dettol Soap…)"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => setIsSuggestionsOpen(true)}

@@ -1,8 +1,8 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
-import { getSuggestions } from "@/services/mockData";
+import { getSuggestions } from "@/services/productApi";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export type SuggestionCategory = "products" | "brands" | "categories";
@@ -34,24 +34,33 @@ export const SearchSuggestions = ({
 }: SearchSuggestionsProps) => {
   const [suggestions, setSuggestions] = React.useState<Suggestion[]>([]);
   const [selectedValue, setSelectedValue] = React.useState("");
+  const [fetchingData, setFetchingData] = useState(false);
   
-  // Generate mock suggestions when query changes
-  React.useEffect(() => {
-    if (query.trim().length === 0) {
-      // Show popular searches when empty
-      const popularSearches = getSuggestions("", true);
-      setSuggestions(popularSearches);
-      return;
-    }
+  // Fetch suggestions when query changes
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (!isOpen) return;
+      
+      setFetchingData(true);
+      try {
+        // Fetch real suggestions from API
+        const results = await getSuggestions(query, query.trim().length === 0);
+        setSuggestions(results);
+      } catch (error) {
+        console.error("Error fetching suggestions:", error);
+        setSuggestions([]);
+      } finally {
+        setFetchingData(false);
+      }
+    };
     
-    // Add a small delay to simulate API request
+    // Add a small delay to avoid excessive API calls
     const timer = setTimeout(() => {
-      const results = getSuggestions(query);
-      setSuggestions(results);
+      fetchSuggestions();
     }, 150);
     
     return () => clearTimeout(timer);
-  }, [query]);
+  }, [query, isOpen]);
   
   // Group suggestions by category
   const productSuggestions = suggestions.filter(s => s.category === "products");
@@ -85,6 +94,9 @@ export const SearchSuggestions = ({
     onSelect(value);
     onOpenChange(false);
   };
+
+  // Show loading state when fetching data or when parent indicates loading
+  const showLoading = isLoading || fetchingData;
   
   return (
     <div className={cn("relative w-full", className)}>
@@ -93,7 +105,7 @@ export const SearchSuggestions = ({
         isOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4 pointer-events-none"
       )}>
         <CommandList>
-          {isLoading ? (
+          {showLoading ? (
             <div className="p-4 space-y-3">
               <Skeleton className="h-4 w-3/4" />
               <Skeleton className="h-4 w-1/2" />

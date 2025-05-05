@@ -1,11 +1,10 @@
-
 import { useState, useEffect } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { HeroSection } from "@/components/home/HeroSection";
 import { HowItWorks } from "@/components/home/HowItWorks";
 import { SearchResults, Product } from "@/components/home/SearchResults";
-import { searchProducts } from "@/services/mockData";
+import { searchProducts } from "@/services/productApi";
 import { Button } from "@/components/ui/button";
 import { ArrowUp } from "lucide-react";
 
@@ -24,15 +23,14 @@ const Index = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleSearch = (query: string) => {
+  const handleSearch = async (query: string) => {
     setSearchQuery(query);
     setIsSearching(true);
     
-    // Add a small delay to simulate search processing
-    setTimeout(() => {
-      const results = searchProducts(query);
+    try {
+      // Fetch real products using the API
+      const results = await searchProducts(query);
       setProducts(results);
-      setIsSearching(false);
       
       // Scroll to results section
       if (results.length > 0) {
@@ -40,7 +38,11 @@ const Index = () => {
           document.getElementById("results")?.scrollIntoView({ behavior: "smooth" });
         }, 100);
       }
-    }, 500);
+    } catch (error) {
+      console.error("Error searching products:", error);
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   const scrollToTop = () => {
